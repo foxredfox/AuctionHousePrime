@@ -9,8 +9,9 @@ namespace AuctionHouse03
     class Auction
     {
         private Object _lock = new object();
-        private object currentItem = new object();
+        private Item currentItem;
         private IBroadcaster broadcaster;
+        private int currentBid;
 
         public Auction(IBroadcaster broadcaster)
         {
@@ -19,7 +20,8 @@ namespace AuctionHouse03
 
         public void Start()
         {
-
+            currentItem = new Item();
+            currentBid = 0;
         }
 
         public void PlayerJoin(Bidder bidder)
@@ -39,7 +41,18 @@ namespace AuctionHouse03
 
         private void ReadResponse(string v)
         {
-            throw new NotImplementedException();
+            int numberResponse;
+            bool r = Int32.TryParse(v, out numberResponse);
+
+            lock (_lock)
+            {
+                if (r && numberResponse > currentBid)
+                {
+                    broadcaster.Broadcast("Current bid set to " + numberResponse);
+                    currentBid = numberResponse;
+                }
+            }
+            
         }
     }
 }
